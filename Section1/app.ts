@@ -8,9 +8,16 @@ function add(n1: number, n2: number, showResult: boolean, phrase: string) {
   }
 }
 
-const number1 = 5;
+const number1 = 5; // 타입 추론에 의해 타입을 따로 지정하지 않아도 됨!
+
+// 처음에 값을 할당하지 않고 나중에 할당해주는 경우엔 타입 지정해주는 것이 좋음~!
+// let number11: number; 
+// number1 = 5;
+
+// 타스는 추론된 타입이더라도 추론된 타입에 어긋나면 에러 출력!!
+
 const number2 = 2.8;
 const printResult = true;
-const resultPhrase = 'Result is: ';
+let resultPhrase = 'Result is: ';
 
 add(number1, number2, printResult, resultPhrase);
