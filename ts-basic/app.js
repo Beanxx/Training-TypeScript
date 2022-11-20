@@ -1,19 +1,24 @@
-function add(n1, n2, showResult, phrase) {
-    var result = n1 + n2;
-    if (showResult) {
-        console.log(phrase + result); // Result is: 7.8 (숫자끼리의 계산은 result에서 한 후에 출력하는 것이므로 원하는대로 출력~!)
-        console.log(phrase + n1 + n2); // Result is: 52.8  (문자열 + 숫자 + 숫자 => 문자열 계산)
-    }
-    else {
-        return n1 + n2;
-    }
+// enum {NEW, OLD}: [열거형] 자스에선 존재하지 않으며 타스에만 존재하는 타입
+// const ADMIN = 0;
+// const READ_ONLY = 1;
+// const AUTHOR = 2;
+var Role;
+(function (Role) {
+    Role[Role["ADMIN"] = 0] = "ADMIN";
+    Role[Role["READ_ONLY"] = 1] = "READ_ONLY";
+    Role[Role["AUTHOR"] = 2] = "AUTHOR";
+})(Role || (Role = {}));
+;
+// 시작 숫자를 0으로 시작하지 않으려는 경우, 식별자에 등호를 추가하여 다른 숫자 입력도 가능!
+// enum Role { ADMIN = 5, READ_ONLY, AUTHOR }; // => 5 6 7
+// 숫자 말고도 문자 등도 할당 가능!
+var person = {
+    name: 'bean',
+    age: 24,
+    hobbies: ['Sports', 'Cooking'],
+    // role: ADMIN // type: number => 이를 해결하는 방법이 바로 enum 타입 사용하기!
+    role: Role.ADMIN
+};
+if (person.role === Role.ADMIN) {
+    console.log('is admin');
 }
-var number1 = 5; // 타입 추론에 의해 타입을 따로 지정하지 않아도 됨!
-// 처음에 값을 할당하지 않고 나중에 할당해주는 경우엔 타입 지정해주는 것이 좋음~!
-// let number11: number; 
-// number1 = 5;
-// 타스는 추론된 타입이더라도 추론된 타입에 어긋나면 에러 출력!!
-var number2 = 2.8;
-var printResult = true;
-var resultPhrase = 'Result is: ';
-add(number1, number2, printResult, resultPhrase);
