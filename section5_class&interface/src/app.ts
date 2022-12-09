@@ -1,4 +1,8 @@
-class Department {
+// singleton pattern: 특정 클래스의 인스턴스를 정확히 하나만 갖도록 함
+// => static 메소드나 속성을 사용할 수 없거나 클래스를 기반으로 하나의 객체만 가질 수 있도록 하고자 하는 경우에 유용!
+
+
+abstract class Department {
   static fiscalYear = 2020;
   // private readonly id: string;
   // private name: string;
@@ -8,7 +12,7 @@ class Department {
 
   // 매개변수에 private과 type을 함께 설정해줄 수 있다. 그러면 위에서 따로 타입지정 안 해줘도 됨!
   // readonly: 초기화 후에 변경되면 안 되는 특정 필드에 설정 (초기화 중에 한번만 설정 가능!)
-  constructor(private readonly id: string, public name: string) {
+  constructor(protected readonly id: string, public name: string) {
     // this.id = id;
     // this.name = n;
 
@@ -22,11 +26,16 @@ class Department {
     return { name: name }
   }
 
-  describe(this: Department) {
-    console.log(`Department (${this.id}): ${this.name}`)
-    // this.name가 아닌 name 작성시 클래스 내의 변수가 아닌 외부의 전역 변수를 불러오게 됨
-    // this: 생성된 클래스의 구체적인 인스턴스 참조
-  }
+  // 메소드 앞에 abstract가 붙으면 class 앞에도 abstract를 추가해야 함
+  abstract describe(this: Department): void;
+  // abstract class: 일부 상위 클래스를 기반으로 하는 모든 클래스가 일부 공통 메소드 또는 속성을 공유하도록 하려는 경우 아주 유용~!
+  // => 인스턴스화될 수 없고 확장되어야 하는 클래스!
+
+  // describe(this: Department) {
+  // console.log(`Department (${this.id}): ${this.name}`)
+  // this.name가 아닌 name 작성시 클래스 내의 변수가 아닌 외부의 전역 변수를 불러오게 됨
+  // this: 생성된 클래스의 구체적인 인스턴스 참조
+  // }
 
   addEmployee(employee: string) {
     // this.id = 'd2' // => error because of read-only property
@@ -49,12 +58,17 @@ class ITDepartment extends Department {
     this.admins = admins; // 새롭게 추가한 값
   }
 
+  describe() {
+    console.log('IT Department - ID: ' + this.id);
+  }
 }
 
 class AccountingDepartment extends Department {
   // 다른 클래스를 상속받는 클래스의 경우 비어 있어도 사용 가능 (why? 생성자를 포함하여 모든 것ㅇ르 자동으로 가져오기 때문)
   // 즉, 하위 클래스를 인스턴스화할 때 생성자가 자동으로 사용되는 것!
   private lastReport: string;
+  private static instance: AccountingDepartment;
+  // => 클래스 자체에서 접근할 수 있는 static 속성이 있지만 private으로 인해 클래스 내에서만 접근 가능함
 
 
   // Getter & Setter는 로직을 캡슐화하고 속성을 읽거나 설정하려고 할 때 실행되어야 하는 추가적인 로직을 추가하는데 유용함
@@ -76,10 +90,25 @@ class AccountingDepartment extends Department {
     this.addReport(value);
   }
 
-  constructor(id: string, private reports: string[]) {
+  private constructor(id: string, private reports: string[]) {
     // 꼭 super를 먼저 호출한 다음에 this 키워드를 사용하여 작업을 수행해야 한다!
     super(id, 'Accounting')
     this.lastReport = reports[0]
+  }
+
+  // 클래스의 인스턴스가 이미 있는지 확인하고 없다면 새 인스턴스를 반환하는 역할
+  static getInstance() {
+    // static 대신 this로 설정하여 this.instance로 작성하면 클래스 자체를 참조하게 되므로 다른 모든 static 속성에 접근할 수 있음
+    if (AccountingDepartment.instance) {
+      return this.instance;
+    }
+    // 아래 코드는 한번만 실행됨 (why? 인스턴스 생성시 인스턴스를 if블록으로 만들고 기존의 인스턴스를 반환하기 때문)
+    this.instance = new AccountingDepartment('d2', []);
+    return this.instance;
+  }
+
+  describe() {
+    console.log('Accounting Department - ID: ' + this.id);
   }
 
   addEmployee(name: string) {
@@ -107,7 +136,6 @@ console.log(employee1, Department.fiscalYear) // {name: 'Max'} 2020
 const it = new ITDepartment('d1', ['Max']);
 
 
-
 it.addEmployee('Max');
 it.addEmployee('Manu');
 
@@ -118,7 +146,12 @@ it.printEmployeeInformation();
 
 console.log(it);
 
-const accounting = new AccountingDepartment('d2', []);
+// const accounting = new AccountingDepartment('d2', []);
+const accounting = AccountingDepartment.getInstance();
+const accounting2 = AccountingDepartment.getInstance();
+
+console.log(accounting, accounting2)
+// 이 둘은 같은 객체이자 같은 인스턴스! (why? private 키워들르 사용한 싱글턴 패턴을 가진 인스턴스가 하나뿐이기 때문!)
 
 accounting.mostRecentReport = 'Year End Report';
 accounting.addReport('Something went wrong...');
@@ -127,8 +160,10 @@ console.log(accounting.mostRecentReport);
 accounting.addEmployee('Max');
 accounting.addEmployee('Manu');
 
-accounting.printReports(); // ['Something went wrong...']
-accounting.printEmployeeInformation(); // 1 ['Manu']
+// accounting.printReports(); // ['Something went wrong...']
+// accounting.printEmployeeInformation(); // 1 ['Manu']
+
+accounting.describe();
 
 
 // const itCopy = { name: 'DUMMY', describe: it.describe }
